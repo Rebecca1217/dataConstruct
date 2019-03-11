@@ -69,6 +69,30 @@ save('E:\futureData\longVolume.mat', 'longVolume')
 save('E:\futureData\shortVolume.mat', 'shortVolume')
 
 
+%% 需要构造前20名变化量的数据，用总量自己相减计算的结果不好
+posLongDelta = res(strcmp(res.Type, '2'), {'ContName', 'Date', 'DeltaValue'});
+longVolumeDelta = tableData(:, {'Date', 'MainCont', 'ContName'});
+longVolumeDelta = outerjoin(longVolumeDelta, posLongDelta, 'type', 'left', 'MergeKeys', true, ...
+    'LeftKeys', {'Date', 'MainCont'}, 'RightKeys', {'Date', 'ContName'});
+longVolumeDelta = unstack(longVolumeDelta(:, {'Date', 'ContName_longVolumeDelta', 'DeltaValue'}), 'DeltaValue', 'ContName_longVolumeDelta');
+% 问题：这里空值需不需要处理？已经有数据以后的空值其实都该是0
+
+posShortDelta = res(strcmp(res.Type, '3'), {'ContName', 'Date', 'DeltaValue'});
+shortVolumeDelta = tableData(:, {'Date', 'MainCont', 'ContName'});
+shortVolumeDelta = outerjoin(shortVolumeDelta, posShortDelta, 'type', 'left', 'MergeKeys', true, ...
+    'LeftKeys', {'Date', 'MainCont'}, 'RightKeys', {'Date', 'ContName'});
+shortVolumeDelta = unstack(shortVolumeDelta(:, {'Date', 'ContName_shortVolumeDelta', 'DeltaValue'}), 'DeltaValue', 'ContName_shortVolumeDelta');
+
+
+tradeDelta = res(strcmp(res.Type, '1'), {'ContName', 'Date', 'DeltaValue'});
+tradeVolumeDelta = tableData(:, {'Date', 'MainCont', 'ContName'});
+tradeVolumeDelta = outerjoin(tradeVolumeDelta, tradeDelta, 'type', 'left', 'MergeKeys', true, ...
+    'LeftKeys', {'Date', 'MainCont'}, 'RightKeys', {'Date', 'ContName'});
+tradeVolumeDelta = unstack(tradeVolumeDelta(:, {'Date', 'ContName_tradeVolumeDelta', 'DeltaValue'}), 'DeltaValue', 'ContName_tradeVolumeDelta');
+
+save('E:\futureData\longVolumeDelta.mat', 'longVolumeDelta')
+save('E:\futureData\shortVolumeDelta.mat', 'shortVolumeDelta')
+
 %% 调整数据格式
 % dataPos = stack(dataPos, 2:width(dataPos), ...
 %     'NewDataVariableName', 'SpotPrice', 'IndexVariableName', 'Variety');
